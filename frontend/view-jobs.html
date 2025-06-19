@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Job Listings</title>
+</head>
+<body>
+  <h2>Available Jobs</h2>
+  <ul id="jobList"></ul>
+
+  <script>
+    fetch('http://<JOBS-SERVICE-URL>/jobs')
+      .then(res => res.json())
+      .then(data => {
+        const jobList = document.getElementById('jobList');
+        data.forEach(job => {
+          const li = document.createElement('li');
+          li.textContent = `${job.title} at ${job.company} (${job.location})`;
+          jobList.appendChild(li);
+        });
+      });
+  </script>
+</body>
+</html>
