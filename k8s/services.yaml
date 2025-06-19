@@ -3,6 +3,7 @@ kind: Service
 metadata:
   name: jobs-service
 spec:
+  type: LoadBalancer
   selector:
     app: jobs-service
   ports:
@@ -14,6 +15,7 @@ kind: Service
 metadata:
   name: applications-service
 spec:
+  type: LoadBalancer
   selector:
     app: applications-service
   ports:
