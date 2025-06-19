@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Apply for a Job</title>
+</head>
+<body>
+  <h2>Apply for a Job</h2>
+
+  <form id="applicationForm">
+    <label>Choose Job:</label><br>
+    <select id="jobSelect" required></select><br><br>
+
+    <label>Your Name:</label><br>
+    <input type="text" id="name" required><br><br>
+
+    <label>Resume (Text):</label><br>
+    <textarea id="resume" required></textarea><br><br>
+
+    <button type="submit">Submit Application</button>
+  </form>
+
+  <p id="message"></p>
+
+  <script>
+    // Load jobs into dropdown
+    fetch('http://<JOBS-SERVICE-URL>/jobs')
+      .then(res => res.json())
+      .then(data => {
+        const jobSelect = document.getElementById('jobSelect');
+        data.forEach(job => {
+          const option = document.createElement('option');
+          option.value = job.id;
+          option.text = `${job.title} at ${job.company}`;
+          jobSelect.appendChild(option);
+        });
+      });
+
+    // Submit application
+    document.getElementById('applicationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const application = {
+        job_id: document.getElementById('jobSelect').value,
+        applicant_name: document.getElementById('name').value,
+        resume: document.getElementById('resume').value
+      };
+
+      const response = await fetch('http://<APPLICATIONS-SERVICE-URL>/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(application)
+      });
+
+      const result = await response.json();
+      document.getElementById('message').innerText = result.message || result.error;
+    });
+  </script>
+</body>
+</html>
