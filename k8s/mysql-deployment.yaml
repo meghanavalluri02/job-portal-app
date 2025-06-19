@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:5.7
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: password
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - mountPath: /docker-entrypoint-initdb.d
+              name: init-script
+            - mountPath: /var/lib/mysql
+              name: mysql-storage
+      volumes:
+        - name: init-script
+          configMap:
+            name: mysql-init-script
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-script
+data:
+  mysql-init.sql: |
+    CREATE DATABASE IF NOT EXISTS jobportal;
+    USE jobportal;
+
+    CREATE TABLE IF NOT EXISTS jobs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(100),
+        company VARCHAR(100),
+        location VARCHAR(100)
+    );
+
+    CREATE TABLE IF NOT EXISTS applications (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        job_id INT,
+        applicant_name VARCHAR(100),
+        resume TEXT,
+        FOREIGN KEY (job_id) REFERENCES jobs(id)
+    );
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
