@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Job Applications</title>
+</head>
+<body>
+  <h2>Applications</h2>
+  <ul id="applicationsList"></ul>
+
+  <script>
+    fetch('http://<APPLICATIONS-SERVICE-URL>/applications')
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById('applicationsList');
+        data.forEach(app => {
+          const li = document.createElement('li');
+          li.innerHTML = `<b>${app.applicant_name}</b> applied for <b>${app.job_title}</b> at <i>${app.company}</i><br>Resume: ${app.resume}`;
+          list.appendChild(li);
+        });
+      });
+  </script>
+</body>
+</html>
